@@ -59,7 +59,7 @@ for plan in future_plans:
 
 # Gallery Section: Displaying images from the specified folder
 st.header("Our Gallery 💞")
-image_folder = r"E:\output"  # Use raw string to avoid escape characters
+image_folder = r"output"  # Use raw string to avoid escape characters
 
 # List all image files in the folder
 if os.path.exists(image_folder):
