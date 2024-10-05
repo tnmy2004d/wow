@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from PIL import Image
 
 # Simple password protection
 def check_password():
@@ -13,26 +14,55 @@ def check_password():
 if not check_password():
     st.stop()  # Stop the app if the password is wrong
 
-# Custom CSS to set background image
+# Automatically embed Spotify music player when the password is correct
+st.markdown(
+    """
+    <iframe src="https://open.spotify.com/embed/track/5iFwAOB2TFkPJk8sMlxP8g?autoplay=1" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+    """, unsafe_allow_html=True
+)
+
+# Custom CSS to set background color and style
 st.markdown(
     """
     <style>
     body {
-        background-image: url('https://img.freepik.com/free-vector/blurred-valentine-s-day-wallpaper_23-2148819570.jpg');
-        background-size: cover;  /* Adjust to cover the entire background */
-        background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-color: #FFB6C1;  /* Light pink background */
+        color: #333;  /* Darker text color for contrast */
+    }
+    h1, h2, h3 {
+        font-family: 'Arial', sans-serif;
+    }
+    .timeline {
+        border-left: 2px solid #FF69B4;  /* Pink line for timeline */
+        padding-left: 20px;
+        margin-left: 20px;
+        position: relative;
+    }
+    .timeline-event {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: rgba(255, 105, 180, 0.1);  /* Light pink background for events */
+        position: relative;
+    }
+    .timeline-event::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 10px;
+        width: 15px;
+        height: 15px;
+        background-color: #FF69B4;  /* Pink dot for events */
+        border-radius: 50%;
+    }
+    .future-plans {
+        background-color: rgba(255, 255, 255, 0.9);  /* Slightly transparent white */
+        border-radius: 5px;
+        padding: 15px;
     }
     </style>
     """,
     unsafe_allow_html=True
-)
-
-# Embed Spotify music player starting at 0:47
-st.markdown(
-    """
-    <iframe src="https://open.spotify.com/embed/track/5iFwAOB2TFkPJk8sMlxP8g?autoplay=1&start=47" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
-    """, unsafe_allow_html=True
 )
 
 # Title
@@ -43,34 +73,71 @@ st.header("Happy 2 Months Kammo! ❤️😘😘")
 
 # Timeline Section
 st.header("Timeline of Our Moments 💖")
+st.markdown('<div class="timeline">', unsafe_allow_html=True)
 
 timeline_data = {
-    "Date": ["2024-01-11", "2024-01-19", "2024-01-20", "2024-08-06"],
-    "Event": ["First Hug in 2024", "First Kiss 💋 (4:17 PM)", "First Time We Held Hands", "We Started Dating (5:47 PM)"],
+    "Date": ["2024-01-11", "2024-01-19", "2024-01-20", "2024-08-06","2024-10-06"],
+    "Event": [
+        "🫂 First Hug in 2024", 
+        "💋 First Kiss (4:17 PM)", 
+        "🤝 First Time We Held Hands", 
+        "❤️ We Started Dating (5:47 PM)",
+        "🩷🩷 Celebrating 2 Months Together"
+    ],
 }
+
 for date, event in zip(timeline_data["Date"], timeline_data["Event"]):
-    st.write(f"**{date}:** {event}")
+    st.markdown(f'<div class="timeline-event"><strong>{date}:</strong> {event}</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Future Section
 st.header("Future Adventures ✨🌄")
-future_plans = ["Visiting a Hill Station 🏔️", "Aquarium 🐠", "Planetarium 🌌", "Concert 🎶", "Mountains 🏞️"]
+st.markdown('<div class="future-plans">', unsafe_allow_html=True)
+
+future_plans = [
+    "🏔️ Visiting a Hill Station", 
+    "🐠 Aquarium", 
+    "🌌 Planetarium", 
+    "🎶 Concert", 
+    "🏞️ Mountains"
+]
 for plan in future_plans:
     st.write(f"- {plan}")
 
-# Gallery Section: Displaying images from the specified folder
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Gallery Section: Creating a collage of images
 st.header("Our Gallery 💞")
 image_folder = r"output"  # Use raw string to avoid escape characters
 
 # List all image files in the folder
 if os.path.exists(image_folder):
     image_files = [f for f in os.listdir(image_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
-    
-    # Create columns to display images side by side
-    cols = st.columns(6)  # Create 6 columns
-    for i, image_file in enumerate(image_files):
-        if i < 6:  # Limit to 6 images
-            image_path = os.path.join(image_folder, image_file)
-            cols[i].image(image_path, use_column_width='auto', width=200)  # Set width for smaller size
+
+    # Limit to 6 images for collage
+    image_files = image_files[:6]
+    images = []
+
+    for image_file in image_files:
+        image_path = os.path.join(image_folder, image_file)
+        images.append(Image.open(image_path))
+
+    # Create a collage
+    collage_width = 3 * 200  # 3 images wide
+    collage_height = 2 * 200  # 2 images tall
+    collage = Image.new('RGB', (collage_width, collage_height))
+
+    for index, image in enumerate(images):
+        # Resize image to fit in the collage
+        image = image.resize((200, 200))
+        x = (index % 3) * 200
+        y = (index // 3) * 200
+        collage.paste(image, (x, y))
+
+    # Display the collage
+    st.image(collage, use_column_width='auto')
+
 else:
     st.error("Image folder does not exist!")
 
